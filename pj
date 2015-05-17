@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# get the directory of this script so we can execute the related python
+# This part is borrowed from Facebook Path Picker (https://github.com/facebook/PathPicker/)
+SOURCE=$0
+# resolve $SOURCE until the file is no longer a symlink
+while [ -h "$SOURCE" ]; do
+  BASEDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  # if $SOURCE was a relative symlink, we need to resolve it relative to
+  # the path where the symlink file was located
+  [[ $SOURCE != /* ]] && SOURCE="$BASEDIR/$SOURCE"
+done
+BASEDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+PYTHONCMD="python"
+
+function doProgram {
+  # run main python script
+  $PYTHONCMD "$BASEDIR/src/main.py" "$@"
+}
+
+for opt in "$@"; do
+  if [ "$opt" == "--debug" ]; then
+    echo "Executing from '$BASEDIR'"
+  elif [ "$opt" == "--version" ]; then
+    VERSION="$($PYTHONCMD "$BASEDIR/src/version.py")"
+    echo "pj version $VERSION"
+    exit 0
+  elif [ "$opt" == "--python3" ]; then
+    PYTHONCMD="python3"
+  elif [ "$opt" == "--help" -o "$opt" == "-h" ]; then
+    $PYTHONCMD "$BASEDIR/src/printHelp.py"
+    exit 0
+  fi
+done
+
+doProgram "$@"
