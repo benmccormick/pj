@@ -1,5 +1,6 @@
-import os
 import projectconfig
+import configparser
+import listprint
 
 
 config_data = projectconfig.get_config()
@@ -8,6 +9,7 @@ if not config_data:
     print 'No .pjconfig file found'
     exit()
 
-project = config_data['files']
+file_list = configparser.get_file_list(config_data)
 
-print os.listdir(project[0]['included_folders'][0])
+listprint.print_list(file_list)
+
