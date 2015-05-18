@@ -9,7 +9,7 @@ def get_file_list(config_data):
 
     project = config_data['files']
 
-    file_list = os.listdir(project[0]['included_folders'][0])
+    file_list = os.listdir(project['included_folders'][0])
 
     file_list = map(lambda f: base_dir + '/' + f, file_list)
 
