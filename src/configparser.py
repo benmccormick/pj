@@ -7,42 +7,38 @@ import os.path
 
 def get_file_list(config_data, base_dir, ignored_files):
 
-    project = config_data['files']
     file_list = []
-    # we add included folders first, excluding ignored files
-    if 'included_folders' in project:
-        file_list.extend(include_folders(project['included_folders'], base_dir, ignored_files))
-    # then add included files, bypassing the ignored files list since they were
-    # added explicitly
-    if 'included_files' in project:
-        file_list.extend(include_files(project['included_files'], base_dir))
-    if 'excluded_folders' in project:
-        file_list = exclude_folders(file_list, project['excluded_folders'], base_dir)
-    if 'excluded_files' in project:
-        file_list = exclude_files(file_list, project['excluded_files'], base_dir)
+    for folder in config_data['folders']:
+        folder_list = []
+        if 'path' in folder:
+            folder_list.extend(include_folders(folder['path'], base_dir, ignored_files))
+        else:
+            #TODO: Throw Error here
+            print 'invalid config'
+        # then add included files, bypassing the ignored files list since they were
+        # added explicitly
+        if 'folder_exclude_patterns' in folder:
+            folder_list = exclude_folders(folder_list, folder['folder_exclude_patterns'], base_dir)
+        if 'file_exclude_patterns' in folder:
+            folder_list = exclude_files(folder_list, folder['file_exclude_patterns'], base_dir)
+        file_list.extend(folder_list)
     
     return deduplicate(file_list)
 
 
-def include_folders(folders, base_dir, ignored_files):
+def include_folders(folder, base_dir, ignored_files):
     returned_files = []
-    for folder in folders:
-        full_path = normalize_path(folder, base_dir)
-        file_walk = os.walk(full_path) 
-        for directory in file_walk:
-            path = directory[0]
-            file_list = directory[2]
-            for file_name in file_list:
-                file_path = path + '/' + file_name
-                if not should_be_ignored(file_path, ignored_files):
-                    returned_files.append(file_path)
+    full_path = normalize_path(folder, base_dir)
+    file_walk = os.walk(full_path) 
+    for directory in file_walk:
+        path = directory[0]
+        file_list = directory[2]
+        for file_name in file_list:
+            file_path = path + '/' + file_name
+            if not should_be_ignored(file_path, ignored_files):
+                returned_files.append(file_path)
 
     return returned_files
-
-def include_files(files, base_dir):
-    included_files = map(lambda f: normalize_path(f, base_dir), files)
-    return filter(lambda f: not os.path.isfile(f), included_files)
-
 
 def exclude_folders(paths, excluded_folders, base_dir):
     # this could be optimized later if the  paths were sorted in some way
