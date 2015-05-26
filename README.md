@@ -14,8 +14,8 @@ The only other thing you'll need is a .pjconfig file.  You can define a simple o
 
 ```
 {
-    "files": {
-        "included_folders":["src"]
+    "folders": {
+        "path":["src"]
     }
 }
 ```
