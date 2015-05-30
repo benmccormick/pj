@@ -19,20 +19,34 @@ function doProgram {
   # run main python script
   $PYTHONCMD "$BASEDIR/src/main.py" "$@"
 }
+while [[ $# > 0 ]]
+do
+opt="$1"
 
-for opt in "$@"; do
-  if [ "$opt" == "--debug" ]; then
+case $opt in 
+    -h|--help)
+    $PYTHONCMD "$BASEDIR/src/printHelp.py"
+    exit 0
+    ;;
+    --debug)
     echo "Executing from '$BASEDIR'"
-  elif [ "$opt" == "--version" ]; then
+    ;;
+    --version)
     VERSION="$($PYTHONCMD "$BASEDIR/src/version.py")"
     echo "pj version $VERSION"
     exit 0
-  elif [ "$opt" == "--python3" ]; then
+    ;;
+    --python3)
     PYTHONCMD="python3"
-  elif [ "$opt" == "--help" -o "$opt" == "-h" ]; then
-    $PYTHONCMD "$BASEDIR/src/printHelp.py"
-    exit 0
-  fi
+    ;;
+    -f|--filter) 
+    FILTER="$2"
+    shift
+    ;;
+    *)
+    ;;
+esac
+shift
 done
 
-doProgram "$@"
+doProgram "$FILTER" 

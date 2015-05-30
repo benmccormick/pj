@@ -7,16 +7,18 @@ import fnmatch
 #
 
 
-def get_file_list(config_data, base_dir, ignored_files):
+def get_file_list(config_data, base_dir, filter_str, ignored_files):
 
     file_list = []
     for folder in config_data['folders']:
         folder_list = []
+        path = ''
         if 'path' in folder:
-            folder_list.extend(include_folders(folder['path'], base_dir, ignored_files))
+            path = folder['path']
         else:
-            #TODO: Throw Error here
-            print('invalid config')
+            # assume this is a base level folder
+            path = base_dir
+        folder_list.extend(include_folder(path, base_dir, ignored_files))
         # then add included files, bypassing the ignored files list since they were
         # added explicitly
         if 'folder_exclude_patterns' in folder:
@@ -24,10 +26,13 @@ def get_file_list(config_data, base_dir, ignored_files):
         if 'file_exclude_patterns' in folder:
             folder_list = exclude_files(folder_list, folder['file_exclude_patterns'], base_dir)
         file_list.extend(folder_list)
-    return deduplicate(file_list)
+    file_list = deduplicate(file_list)
+    file_list = filter_list(file_list, filter_str, config_data)
+    file_list.sort()
+    return file_list
+    
 
-
-def include_folders(folder, base_dir, ignored_files):
+def include_folder(folder, base_dir, ignored_files):
     returned_files = []
     full_path = normalize_path(folder, base_dir)
     file_walk = os.walk(full_path) 
@@ -52,6 +57,29 @@ def exclude_files(paths, excluded_files, base_dir):
     for exclude_file in excluded_files:
         paths = filter(lambda path: not path_matches_file_pattern(path, exclude_file), paths)
     return paths
+
+def filter_list(file_list, filter_str, config_data):
+    filter_data = {}
+    if not filter_str:
+        return file_list
+    if 'filters' in config_data and filter_str in config_data['filters']:
+       filter_data = config_data['filters'][filter_str]
+    else: 
+        #TODO: This should be treated as an error
+        print('Invalid Filter')
+    filtered_list = file_list
+
+    if 'include_patterns' in filter_data:
+        filtered_list = []
+        #TODO: Assuming this is an array, should throw an error if its not
+        for pattern in filter_data['include_patterns']: 
+            filtered_list.extend(filter(lambda path: path_matches_pattern(path, pattern), file_list))
+    if 'excluded_patterns' in filter_data:
+        filtered_list = []
+        #TODO: Assuming this is an array, should throw an error if its not
+        for pattern in filter_data['include_patterns']: 
+            filtered_list.extend(filter(lambda path: not path_matches_pattern(path, pattern), file_list))
+    return filtered_list
 
 def should_be_ignored(file_path, ignored_files):
     for ignore_str in ignored_files:
@@ -80,3 +108,6 @@ def path_contains_folder(path, folder):
 def path_matches_file_pattern(path, pattern):
    file_name = path.split('/')[-1]
    return fnmatch.fnmatch(file_name, pattern)
+
+def path_matches_pattern(path, pattern):
+   return fnmatch.fnmatch(path, pattern)
