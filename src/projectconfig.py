@@ -10,7 +10,7 @@ def get_config():
     #     return False
     config_path = find_config_path(current_dir)
     if not config_path:
-        print 'No path found'
+        print('No path found')
     cf = open(config_path, 'r')
     config_text = cf.read()
     cf.close()

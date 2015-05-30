@@ -16,7 +16,7 @@ def get_file_list(config_data, base_dir, ignored_files):
             folder_list.extend(include_folders(folder['path'], base_dir, ignored_files))
         else:
             #TODO: Throw Error here
-            print 'invalid config'
+            print('invalid config')
         # then add included files, bypassing the ignored files list since they were
         # added explicitly
         if 'folder_exclude_patterns' in folder:
