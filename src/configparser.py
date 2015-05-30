@@ -1,8 +1,10 @@
-# Long term this should handle a full project configuration
-# For now it just processes a single included folder, without recursing it
-
 import os
 import os.path
+import fnmatch
+
+#
+# This file is responsible for parsing a .pjconfig file and translating it into a list of paths
+#
 
 
 def get_file_list(config_data, base_dir, ignored_files):
@@ -22,7 +24,6 @@ def get_file_list(config_data, base_dir, ignored_files):
         if 'file_exclude_patterns' in folder:
             folder_list = exclude_files(folder_list, folder['file_exclude_patterns'], base_dir)
         file_list.extend(folder_list)
-    
     return deduplicate(file_list)
 
 
@@ -41,20 +42,16 @@ def include_folders(folder, base_dir, ignored_files):
     return returned_files
 
 def exclude_folders(paths, excluded_folders, base_dir):
-    # this could be optimized later if the  paths were sorted in some way
-    excluded_folders = map(lambda f: normalize_path(f, base_dir), excluded_folders)
-    for exclude_folder in excluded_folders:
-        paths = filter(lambda p: not p.startswith(exclude_folder), paths)
+    # we're just matching folder names if they occur at any level in the path
+    for excluded_folder in excluded_folders:
+        paths = filter(lambda path: not path_contains_folder(path, excluded_folder), paths)
     return paths
 
 def exclude_files(paths, excluded_files, base_dir):
-    # this could be optimized later if the  paths were sorted in some way
-    excluded_files = map(lambda f: normalize_path(f, base_dir), excluded_files)
+    # We're just matching file names, not paths
     for exclude_file in excluded_files:
-        paths = filter(lambda p: not p == exclude_file, paths)
+        paths = filter(lambda path: not path_matches_file_pattern(path, exclude_file), paths)
     return paths
-
-
 
 def should_be_ignored(file_path, ignored_files):
     for ignore_str in ignored_files:
@@ -72,3 +69,14 @@ def normalize_path(path, base_dir):
 
 def deduplicate(files):
     return list(set(files))
+
+def path_contains_folder(path, folder):
+    # this is not normalized off of base_dir, so exclude patterns
+    # that occur further up the tree will also be caught for now
+    path_parts = path.split('/')
+    clean_folder = folder.strip()
+    return clean_folder in path_parts
+
+def path_matches_file_pattern(path, pattern):
+   file_name = path.split('/')[-1]
+   return fnmatch.fnmatch(file_name, pattern)
