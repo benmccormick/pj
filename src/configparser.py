@@ -49,7 +49,7 @@ def include_folder(folder, base_dir, ignored_files):
 def exclude_folders(paths, excluded_folders, base_dir):
     # we're just matching folder names if they occur at any level in the path
     for excluded_folder in excluded_folders:
-        paths = filter(lambda path: not path_contains_folder(path, excluded_folder), paths)
+        paths = filter(lambda path: not path_contains_folder(path, excluded_folder, base_dir), paths)
     return paths
 
 def exclude_files(paths, excluded_files, base_dir):
@@ -98,9 +98,11 @@ def normalize_path(path, base_dir):
 def deduplicate(files):
     return list(set(files))
 
-def path_contains_folder(path, folder):
+def path_contains_folder(path, folder, base_dir):
     # this is not normalized off of base_dir, so exclude patterns
     # that occur further up the tree will also be caught for now
+    if path.startswith(base_dir):
+        path = path[len(base_dir):]
     path_parts = path.split('/')
     clean_folder = folder.strip()
     return clean_folder in path_parts
