@@ -7,7 +7,7 @@ import fnmatch
 #
 
 
-def get_file_list(config_data, base_dir, filter_str, ignored_files):
+def get_file_list(config_data, base_dir, filter_str, ignored_files, ignored_folders):
 
     file_list = []
     for folder in config_data['folders']:
@@ -18,13 +18,13 @@ def get_file_list(config_data, base_dir, filter_str, ignored_files):
         else:
             # assume this is a base level folder
             path = base_dir
-        folder_list.extend(include_folder(path, base_dir, ignored_files))
+        folder_list.extend(include_folder(path, base_dir))
         # then add included files, bypassing the ignored files list since they were
         # added explicitly
         if 'folder_exclude_patterns' in folder:
-            folder_list = exclude_folders(folder_list, folder['folder_exclude_patterns'], base_dir)
+            folder_list = exclude_folders(folder_list, folder['folder_exclude_patterns'] + ignored_folders, base_dir)
         if 'file_exclude_patterns' in folder:
-            folder_list = exclude_files(folder_list, folder['file_exclude_patterns'], base_dir)
+            folder_list = exclude_files(folder_list, folder['file_exclude_patterns'] + ignored_files, base_dir)
         file_list.extend(folder_list)
     file_list = deduplicate(file_list)
     file_list = filter_list(file_list, filter_str, config_data)
@@ -32,7 +32,7 @@ def get_file_list(config_data, base_dir, filter_str, ignored_files):
     return file_list
     
 
-def include_folder(folder, base_dir, ignored_files):
+def include_folder(folder, base_dir):
     returned_files = []
     full_path = normalize_path(folder, base_dir)
     file_walk = os.walk(full_path) 
@@ -41,8 +41,7 @@ def include_folder(folder, base_dir, ignored_files):
         file_list = directory[2]
         for file_name in file_list:
             file_path = path + '/' + file_name
-            if not should_be_ignored(file_path, ignored_files):
-                returned_files.append(file_path)
+            returned_files.append(file_path)
 
     return returned_files
 
