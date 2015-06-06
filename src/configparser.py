@@ -10,22 +10,25 @@ import fnmatch
 def get_file_list(config_data, base_dir, filter_str, ignored_files, ignored_folders):
 
     file_list = []
-    for folder in config_data['folders']:
-        folder_list = []
-        path = ''
-        if 'path' in folder:
-            path = folder['path']
-        else:
-            # assume this is a base level folder
-            path = base_dir
-        folder_list.extend(include_folder(path, base_dir))
-        # then add included files, bypassing the ignored files list since they were
-        # added explicitly
-        if 'folder_exclude_patterns' in folder:
-            folder_list = exclude_folders(folder_list, folder['folder_exclude_patterns'] + ignored_folders, base_dir)
-        if 'file_exclude_patterns' in folder:
-            folder_list = exclude_files(folder_list, folder['file_exclude_patterns'] + ignored_files, base_dir)
-        file_list.extend(folder_list)
+    if 'folders' not in config_data:
+        file_list.extend(include_folder(base_dir,base_dir))
+    else:
+        for folder in config_data['folders']:
+            folder_list = []
+            path = ''
+            if 'path' in folder:
+                path = folder['path']
+            else:
+                # assume this is a base level folder
+                path = base_dir
+            folder_list.extend(include_folder(path, base_dir))
+            # then add included files, bypassing the ignored files list since they were
+            # added explicitly
+            if 'folder_exclude_patterns' in folder:
+                folder_list = exclude_folders(folder_list, folder['folder_exclude_patterns'] + ignored_folders, base_dir)
+            if 'file_exclude_patterns' in folder:
+                folder_list = exclude_files(folder_list, folder['file_exclude_patterns'] + ignored_files, base_dir)
+            file_list.extend(folder_list)
     file_list = deduplicate(file_list)
     file_list = filter_list(file_list, filter_str, config_data)
     file_list.sort()
