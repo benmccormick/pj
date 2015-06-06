@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Pj : pj - Projects for the command line inspired by Sublime Text">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Pj</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/benmccormick/pj">View on GitHub</a>
+
+          <h1 id="project_title">Pj</h1>
+          <h2 id="project_tagline">pj - Projects for the command line inspired by Sublime Text</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/benmccormick/pj/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/benmccormick/pj/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="pj---projects-for-the-command-line" class="anchor" href="#pj---projects-for-the-command-line" aria-hidden="true"><span class="octicon octicon-link"></span></a>pj - Projects for the command line</h1>
+
+<p>pj is a tool for defining projects on the command line, inspired by Sublime Text's projects.  </p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h3>
+
+<ul>
+<li>Define a set of files that make up a project</li>
+<li>Use "filters" to narrow down file list: To source code for a feature, blog post text files that haven't been published yet, a specific filetype, or any other meaningful subset</li>
+<li>Combine with other *nix programs for project search, editing, or to easily find a specific file</li>
+</ul>
+
+<h3>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<p>For now the easiest way to install pj is manually cloning this git repo to your machine.</p>
+
+<pre><code># Go to /usr/local or whatever directory you use for installing scripts
+cd /usr/local
+# clone the repository from github
+git clone https://github.com/benmccormick/pj
+# symlink pj to /usr/local/bin or somewhere else in your path
+ln -s /usr/local/pj/pj /usr/local/bin/pj
+</code></pre>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<p>pj is simple to use.  In the simplest case, you can just run </p>
+
+<pre><code>pj
+</code></pre>
+
+<p>to list out all of the files in a project.  That's not super useful on its own, but it becomes powerful when combined with other programs.</p>
+
+<p>You can have project wide search by combining pj with a search program like <a href="http://www.gnu.org/software/grep/">grep</a>, <a href="http://beyondgrep.com/">ack</a>, or <a href="https://github.com/ggreer/the_silver_searcher">ag</a>.</p>
+
+<pre><code>pj |ack foo # lists all occurences of foo within files in the project
+</code></pre>
+
+<p>You can list out the project files and then pick the one(s) you want using a file picker like Facebook's <a href="https://facebook.github.io/PathPicker/">PathPicker</a></p>
+
+<pre><code>pj | fpp # pick a file or several files to open in an editor or handle other tasks
+</code></pre>
+
+<p>You can use a fuzzy finder like <a href="https://github.com/junegunn/fzf">fzf</a> to select a file from the project list and open it up in an editor like Vim.</p>
+
+<pre><code>vim $(pj | fzf)
+</code></pre>
+
+<p>For larger projects, you can also use filters to select a subset of the project.  For instance if you've created a filter named <code>analytics</code> that limits selection to files related to an analytics feature, you can pick from those files like this:</p>
+
+<pre><code>pj -f analytics | fpp
+</code></pre>
+
+<h3>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h3>
+
+<p>To define a project with pj, you'll need a .pjconfig file.  You should place that project file at the root of your project's primary directory (below wherever you expect to execute pj from).  </p>
+
+<p>.pjconfig files contain 2 main items, a list of folders and a set of filters.  A typical .pjconfig might look something like this:</p>
+
+<pre><code>{
+    "folders": [{
+        "path": "wcui/app/js",
+        "folder_exclude_patterns": ["vendor"],
+        "file_exclude_patterns": []
+    }, {
+        "path": "wcui/app/css",
+        "folder_exclude_patterns": ["vendor"]
+    }, {
+       "path": "wcui/views",
+       "file_exclude_patterns": ["*.pyc"]
+    }, {
+        "path": "wcui/tests/nightwatch"
+    }, {
+        "folder_exclude_patterns": ["wcui", "docs"]
+    }],
+
+    "filters": {
+        "js": {
+            "include_patterns": ["*.js", "*.es6"]
+        },
+        "nightwatch": {
+            "include_patterns": ["*nightwatch.json", "*/tests/nightwatch*"]    
+        }
+    }
+}
+</code></pre>
+
+<p>Each item in the <code>folders</code> list corresponds to a set of files included in the project. Each folder includes a path (if no path is specified, the path is assumed to be the base directory), and may optionally include a list of <code>folder_exclude_patterns</code> and <code>file_exclude_patterns</code>.  </p>
+
+<p>Filters have a key value that you can use to reference them later, and then can contain an <code>include_patterns property</code> and an <code>exclude_patterns property</code>.  These take a pattern which is matched against the whole path for each file.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Pj maintained by <a href="https://github.com/benmccormick">benmccormick</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-63778756-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
