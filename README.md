@@ -10,7 +10,13 @@ pj is a tool for defining projects on the command line, inspired by Sublime Text
 
 ### Installation
 
-For now the easiest way to install pj is manually cloning this git repo to your machine.
+#### Homebrew
+
+pj isn't in the official homebrew repo, but you can install it using the formula in this repo directly
+
+    brew install https://raw.githubusercontent.com/benmccormick/pj/master/pj.rb
+
+#### Manual
 
 ```
 # Go to /usr/local or whatever directory you use for installing scripts
