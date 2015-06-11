@@ -1,7 +1,7 @@
 print '''
 pj - Projects for the Command Line
 
-Usage: pj [--help] [--version] [--python3] [--debug]
+Usage: pj [--help] [--version] [--python3] [--debug] [--filter|-f filtername] [--relative-path|-r]
 
 Options
 
@@ -9,6 +9,8 @@ Options
 --version                Prints version information
 --python3                Tries to use `python3` instead of `python` to run pj
 --debug                  Prints the location of the pj script
+--filter | -f            Use a filter to limit the files shown
+--relative-path | -r     Display the output file paths as relative to the current directory
 
 Information
 
