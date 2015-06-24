@@ -41,6 +41,7 @@ def get_filtered_files(config_data, base_dir, filter_str, ignored_files, ignored
             exclude_files = folder.get('file_exclude_patterns', []) + ignored_files
             exclude_patterns = filter_data.get('exclude_patterns', [])
             include_patterns = filter_data.get('include_patterns', [])
+            import pdb; pdb.set_trace()
             filtered_paths = filter_paths(paths, base_dir,
                 exclude_folders=exclude_folders,
                 exclude_files=exclude_files,
@@ -126,10 +127,12 @@ def path_contains_folder(path, folder, base_dir):
     return clean_folder in path_parts
 
 def path_matches_file_pattern(path, pattern):
-    """checks to see if a path matches a file pattern"""
-   file_name = path.split('/')[-1]
-   return fnmatch.fnmatch(file_name, pattern)
+    """
+    checks to see if a path matches a file pattern
+    """
+    file_name = path.split('/')[-1]
+    return fnmatch.fnmatch(file_name, pattern)
 
 def path_matches_pattern(path, pattern):
     """checks to see if a path matches a unix glob pattern"""
-   return fnmatch.fnmatch(path, pattern)
+    return fnmatch.fnmatch(path, pattern)
